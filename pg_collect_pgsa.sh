@@ -41,13 +41,15 @@ check_and_split_log() {
 
 # 执行PostgreSQL查询并记录到日志文件
 execute_pg_query() {
+    #echo 'begin.' >> "$LOG_FILE"
     {
-        echo "=== 记录时间: $(date '+%Y-%m-%d %H:%M:%S') ==="
+        #echo "=== 记录时间: $(date '+%Y-%m-%d %H:%M:%S') ==="
         # 查询pg_stat_activity视图
         PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_DATABASE" \
-            -c "SELECT * FROM pg_stat_activity WHERE query != 'idle';"
-        echo ""
+            -A -t -c "SELECT now(),datid, datname, pid, leader_pid, usesysid, usename, application_name, client_addr, client_hostname, client_port, backend_start, xact_start, query_start, state_change, wait_event_type, wait_event, state, backend_xid, backend_xmin, query_id, query, backend_type from pg_stat_activity WHERE pid <> pg_backend_pid() ORDER BY backend_start ASC;"
+        #echo ""
     } >> "$LOG_FILE"
+    #echo 'end.' >> "$LOG_FILE"
 }
 
 # 主函数

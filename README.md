@@ -59,3 +59,7 @@ awk -F '[| ]' '{print $1 " " $2}' pgsa.log | cut -d: -f1-2 | sort | uniq -c
       7 2025-08-28 12:59
       7 2025-08-28 14:09
 ```
+
+## License
+
+使用 MIT License。有关详细信息，请参阅 [LICENSE.txt](./LICENSE.txt) 文件。

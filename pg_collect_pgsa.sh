@@ -7,11 +7,21 @@ PG_PASSWORD="your_password"  # 替换为实际密码
 PG_DATABASE="postgres"
 # LOG_FILE="/tmp/pgsa.log"
 LOG_FILE="./pgsa.log"
-MAX_LOG_SIZE=$((1024 * 1024 * 1024)) # 1GB
+PWD_DIR=`pwd`
+#echo $PWD_DIR
+cd $PWD_DIR
+
+#MAX_LOG_SIZE=$((1024 * 1024 * 1024)) # 1GB
+MAX_LOG_SIZE=$((1)) # 1GB
 
 # 获取当前时间戳（用于日志分割）
 CURRENT_TIME=$(date +"%Y%m%d-%H%M%S")  # 精确到秒
 CURRENT_HOUR=$(date +"%Y%m%d-%H")      # 精确到小时
+
+# 确保日志目录存在
+init_directories() {
+    mkdir -p "$PWD_DIR/logs"
+}
 
 # 检查并分割日志文件
 check_and_split_log() {
@@ -22,10 +32,10 @@ check_and_split_log() {
             # 获取文件创建时间（精确到秒）
             file_time=$(date -r "$LOG_FILE" +"%Y%m%d-%H%M%S")
             # 分割并压缩日志文件
-            gzip -c "$LOG_FILE" > "/tmp/pas-${file_time}.log.gz"
+            gzip -c "$LOG_FILE" > "./logs/pas-${file_time}.log.gz"
             # 清空原日志文件
             > "$LOG_FILE"
-            echo "日志已分割并压缩为 /tmp/pas-${file_time}.log.gz"
+            echo "日志已分割并压缩为 ./logs/pas-${file_time}.log.gz"
         fi
     fi
     
@@ -33,7 +43,7 @@ check_and_split_log() {
     if [ ! -f "$LOG_FILE" ] || [ "$(date -r "$LOG_FILE" +"%Y%m%d-%H")" != "$CURRENT_HOUR" ]; then
         if [ -f "$LOG_FILE" ]; then
             file_time=$(date -r "$LOG_FILE" +"%Y%m%d-%H%M%S")
-            gzip -c "$LOG_FILE" > "/tmp/pas-${file_time}.log.gz"
+            gzip -c "$LOG_FILE" > "./logs/pas-${file_time}.log.gz"
         fi
         > "$LOG_FILE"  # 创建新的空日志文件
     fi
@@ -54,6 +64,7 @@ execute_pg_query() {
 
 # 主函数
 main() {
+    init_directories
     check_and_split_log
     execute_pg_query
 }

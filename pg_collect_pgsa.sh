@@ -9,7 +9,7 @@ PG_DATABASE="postgres"
 LOG_FILE="./pgsa.log"
 PWD_DIR=`pwd`
 #echo $PWD_DIR
-echo "当前文件名:"$0 # 如果是绝对路径，会直接打印
+#echo "当前文件名:"$0 # 如果是绝对路径，会直接打印；而不是文件名
 cd $PWD_DIR
 
 #MAX_LOG_SIZE=$((1024 * 1024 * 1024)) # 1GB

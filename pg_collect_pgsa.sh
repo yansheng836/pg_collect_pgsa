@@ -9,6 +9,7 @@ PG_DATABASE="postgres"
 LOG_FILE="./pgsa.log"
 PWD_DIR=`pwd`
 #echo $PWD_DIR
+echo "当前文件名:"$0 # 如果是绝对路径，会直接打印
 cd $PWD_DIR
 
 #MAX_LOG_SIZE=$((1024 * 1024 * 1024)) # 1GB
@@ -17,6 +18,38 @@ MAX_LOG_SIZE=$((1)) # 1GB
 # 获取当前时间戳（用于日志分割）
 CURRENT_TIME=$(date +"%Y%m%d-%H%M%S")  # 精确到秒
 CURRENT_HOUR=$(date +"%Y%m%d-%H")      # 精确到小时
+
+
+# 确保日志目录存在
+# 定义日志文件路径
+SHELL_LOG_FILE="./debug.log"
+
+# 日志记录函数
+log_message() {
+    local log_level=$1
+    local message=$2
+    echo "$(date '+%Y-%m-%d %H:%M:%S.%N')|[$log_level]|$message" | tee -a "$SHELL_LOG_FILE"
+}
+
+# 检查当前脚本进程是否已存在的函数
+check_existing_process() {
+    # 获取当前脚本的名称（不包含路径）
+    local script_name=$(basename "$0")
+
+    LOCK_FILE="./${0##*/}.lock" # 根据脚本名称生成锁文件
+    exec 9>"$LOCK_FILE" # 将文件描述符9与锁文件关联
+
+    if flock -n 9; then # 非阻塞模式尝试获取排他锁
+        trap 'flock -u 9; rm -f "$LOCK_FILE"; exit' INT TERM EXIT
+        log_message "INFO" "获取锁成功，进程 $script_name 不存在，开始执行脚本。"
+        # 你的脚本主逻辑
+        #sleep 10
+    else
+        log_message "INFO" "获取锁失败，进程 $script_name 已在运行中，退出脚本。"
+        exit 0
+    fi
+}
+
 
 # 确保日志目录存在
 init_directories() {
@@ -64,6 +97,10 @@ execute_pg_query() {
 
 # 主函数
 main() {
+    check_existing_process
+    #sleep 100
+    #exit 0
+
     init_directories
     check_and_split_log
     execute_pg_query

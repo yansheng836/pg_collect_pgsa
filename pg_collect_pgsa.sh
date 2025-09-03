@@ -1,16 +1,22 @@
 #!/bin/bash
+
+# 设置 PATH，添加 psql 所在路径（ whereis psql ）
+PG_PATH=/usr/local/pgsql/bin/
+export PATH=$PG_PATH:$PATH
+
 #PostgreSQL连接参数
 PG_HOST="localhost"
 PG_PORT="54321"
 PG_USER="postgres"
 PG_PASSWORD="your_password"  # 替换为实际密码
 PG_DATABASE="postgres"
-# LOG_FILE="/tmp/pgsa.log"
-LOG_FILE="./pgsa.log"
+
 PWD_DIR=`pwd`
 #echo $PWD_DIR
 #echo "当前文件名:"$0 # 如果是绝对路径，会直接打印；而不是文件名
 cd $PWD_DIR
+# LOG_FILE="/tmp/pgsa.log"
+LOG_FILE="$PWD_DIR/pgsa.log"
 
 #MAX_LOG_SIZE=$((1024 * 1024 * 1024)) # 1GB
 MAX_LOG_SIZE=$((1024 * 1024)) # 1GB
@@ -24,7 +30,7 @@ batchid=$(date +"%Y%m%d_%H%M%S_%N")
 log_message() {
     # 确保日志目录存在
     # 定义日志文件路径
-    SHELL_LOG_FILE="./debug.log"
+    SHELL_LOG_FILE="$PWD_DIR/debug.log"
 
     local log_level=$1
     local message=$2
@@ -94,7 +100,7 @@ execute_pg_query() {
             -A -t -c "SELECT now(),datid, datname, pid, leader_pid, usesysid, usename, application_name, client_addr, client_hostname, client_port, backend_start, xact_start, query_start, state_change, wait_event_type, wait_event, state, backend_xid, backend_xmin, query_id, query, backend_type from pg_stat_activity WHERE pid <> pg_backend_pid() ORDER BY backend_start ASC;"
         #echo ""
     } >> "$LOG_FILE"
-    log_message "INFO" "开始查询数据库结束。"
+    log_message "INFO" "查询数据库结束。"
 }
 
 # 主函数

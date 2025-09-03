@@ -26,6 +26,31 @@
 
 ```
 
+
+## 使用说明
+
+拉取代码，修改参数，设置定时任务。
+
+```shell
+# 克隆代码
+git clone git@github.com:yansheng836/pg_collect_pgsa.git
+cd pg_collect_pgsa
+
+# 修改必要参数(均以 PG_ 开头，例如：PG_PATH、PG_HOST 等)
+vi pg_collect_pgsa.sh
+
+# 查路径
+pwd
+
+# crontab -e
+# 每分钟执行
+* * * * * pwd路径/pg_collect_pgsa.sh
+
+# 每5秒执行（可自行调整秒数）
+* * * * * pwd路径/pg_collect_pgsa_gap_second.sh 5
+```
+
+
 ## 日志分析参考
 
 ### 1.简单检索
@@ -59,6 +84,17 @@ awk -F '[| ]' '{print $1 " " $2}' pgsa.log | cut -d: -f1-2 | sort | uniq -c
       7 2025-08-28 12:59
       7 2025-08-28 14:09
 ```
+
+## 注意事项
+
+1. 在业务较多的库需要注意，可能会存在较多sql，以至于日志增长过快，建议在特殊情况下，短暂使用，并且密切关注磁盘增长。
+2. 其中`query`字段受参数`track_activity_query_size`影响，默认为1024，超长会被截断。修改该参数需要重启服务器。
+
+## bug反馈/需求
+
+GitHub：<https://github.com/yansheng836/pg_collect_pgsa/issues>
+
+Gitee：<https://gitee.com/yansheng0083/pg_collect_pgsa/issues>
 
 ## License
 

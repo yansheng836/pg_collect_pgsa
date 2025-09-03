@@ -1,22 +1,25 @@
 #!/bin/bash
 
+#<<<<<<<< 需要修改的参数 <<<<<<<<<
 # 设置 PATH，添加 psql 所在路径（ whereis psql ）
 PG_PATH=/usr/local/pgsql/bin/
 export PATH=$PG_PATH:$PATH
-
 #PostgreSQL连接参数
 PG_HOST="localhost"
 PG_PORT="54321"
 PG_USER="postgres"
 PG_PASSWORD="your_password"  # 替换为实际密码
 PG_DATABASE="postgres"
+#>>>>>>>>>> 需要修改的参数 >>>>>>>>
 
-PWD_DIR=`pwd`
-#echo $PWD_DIR
-#echo "当前文件名:"$0 # 如果是绝对路径，会直接打印；而不是文件名
-cd $PWD_DIR
-# LOG_FILE="/tmp/pgsa.log"
-LOG_FILE="$PWD_DIR/pgsa.log"
+echo "当前文件名:"$0 # 如果是绝对路径，会直接打印；而不是文件名
+script_path=$(readlink -f "$0")
+# 获取当前脚本的名称（不包含路径）
+script_name=$(basename "$0")
+#echo $script_name
+script_dir=$(dirname "$script_path")
+
+LOG_FILE="$script_dir/pgsa.log"
 
 #MAX_LOG_SIZE=$((1024 * 1024 * 1024)) # 1GB
 MAX_LOG_SIZE=$((1024 * 1024)) # 1GB
@@ -30,7 +33,7 @@ batchid=$(date +"%Y%m%d_%H%M%S_%N")
 log_message() {
     # 确保日志目录存在
     # 定义日志文件路径
-    SHELL_LOG_FILE="$PWD_DIR/debug.log"
+    SHELL_LOG_FILE="$script_dir/debug.log"
 
     local log_level=$1
     local message=$2
@@ -39,10 +42,7 @@ log_message() {
 
 # 检查当前脚本进程是否已存在的函数
 check_existing_process() {
-    # 获取当前脚本的名称（不包含路径）
-    local script_name=$(basename "$0")
-
-    LOCK_FILE="./${0##*/}.lock" # 根据脚本名称生成锁文件
+    LOCK_FILE="$script_dir/${0##*/}.lock" # 根据脚本名称生成锁文件
     exec 9>"$LOCK_FILE" # 将文件描述符9与锁文件关联
 
     if flock -n 9; then # 非阻塞模式尝试获取排他锁
@@ -51,7 +51,7 @@ check_existing_process() {
         #log_message "INFO" "获取锁成功，进程 $script_name 不存在，开始执行脚本。"
     else
         log_message "WARRING" "获取锁失败，进程 $script_name 已在运行中，退出脚本。"
-        exit 0
+        exit 1
     fi
 }
 
@@ -59,14 +59,16 @@ check_existing_process() {
 # 检查并分割日志文件
 check_and_split_log() {
     # 确保日志目录存在
-    mkdir -p "$PWD_DIR/logs"
+    mkdir -p "$script_dir/logs"
 
     # 按照日志文件时间（每小时）分割文件
     if [ ! -f "$LOG_FILE" ] || [ "$(date -r "$LOG_FILE" +"%Y%m%d-%H")" != "$CURRENT_HOUR" ]; then
         if [ -f "$LOG_FILE" ]; then
             file_time=$(date -r "$LOG_FILE" +"%Y%m%d-%H%M%S")
-            gzip -c "$LOG_FILE" > "./logs/pas-${file_time}.log.gz"
-            log_message "INFO" "按小时分割日志，日志已分割并压缩为 ./logs/pas-${file_time}.log.gz 。"
+            gzip_file_name="$script_dir/logs/pas-${file_time}.log.gz"
+            # 分割并压缩日志文件
+            gzip -c "$LOG_FILE" > $gzip_file_name
+            log_message "INFO" "按小时分割日志，日志已分割并压缩为 $gzip_file_name 。"
 
             # 清空原日志文件
             > "$LOG_FILE"
@@ -79,10 +81,10 @@ check_and_split_log() {
         file_size=$(stat -c%s "$LOG_FILE")
         if [ "$file_size" -ge "$MAX_LOG_SIZE" ]; then
             # 获取文件创建时间（精确到秒）
-            file_time=$(date -r "$LOG_FILE" +"%Y%m%d-%H%M%S")
+            gzip_file_name="$script_dir/logs/pas-${file_time}.log.gz"
             # 分割并压缩日志文件
-            gzip -c "$LOG_FILE" > "./logs/pas-${file_time}.log.gz"
-            log_message "INFO" "日志大小达到阈值[$MAX_LOG_SIZE]，日志已分割并压缩为 ./logs/pas-${file_time}.log.gz 。"
+            gzip -c "$LOG_FILE" > $gzip_file_name
+            log_message "INFO" "日志大小达到阈值[$MAX_LOG_SIZE]，日志已分割并压缩为 $gzip_file_name 。"
 
             # 清空原日志文件
             > "$LOG_FILE"

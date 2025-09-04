@@ -21,7 +21,7 @@ script_dir=$(dirname "$script_path")
 
 LOG_FILE="$script_dir/pgsa.log"
 
-MAX_LOG_SIZE=$((1024 * 1024 * 1024)) # 1GB
+MAX_LOG_SIZE=$((1024 * 1024 * 1024)) # 1GB，纯文本的压缩率较高（测试 2.8GB-->19MB，压缩率约 99%），如果觉得小了，可以自行调整
 
 # 获取当前时间戳（用于日志分割）
 CURRENT_TIME=$(date +"%Y%m%d-%H%M%S")  # 精确到秒
@@ -63,7 +63,7 @@ check_and_split_log() {
     # 按照日志文件时间（每小时）分割文件
     if [ ! -f "$LOG_FILE" ] || [ "$(date -r "$LOG_FILE" +"%Y%m%d-%H")" != "$CURRENT_HOUR" ]; then
         if [ -f "$LOG_FILE" ]; then
-            file_time=$(date -r "$LOG_FILE" +"%Y%m%d-%H%M%S")
+            file_time=$(date -r "$LOG_FILE" +"%Y%m%d-%H")
             gzip_file_name="$script_dir/logs/pas-${file_time}.log.gz"
             # 分割并压缩日志文件
             gzip -c "$LOG_FILE" > $gzip_file_name
@@ -80,6 +80,7 @@ check_and_split_log() {
         file_size=$(stat -c%s "$LOG_FILE")
         if [ "$file_size" -ge "$MAX_LOG_SIZE" ]; then
             # 获取文件创建时间（精确到秒）
+            file_time=$(date -r "$LOG_FILE" +"%Y%m%d-%H%M%S")
             gzip_file_name="$script_dir/logs/pas-${file_time}.log.gz"
             # 分割并压缩日志文件
             gzip -c "$LOG_FILE" > $gzip_file_name

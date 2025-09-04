@@ -1,6 +1,37 @@
 # pg_collect_pgsa
 
-纯脚本收集pg_stat_activity的数据到本地。
+这是一个纯脚本工具，用于从PostgreSQL的pg_stat_activity视图中定期收集数据并保存到本地日志文件。
+
+*特性*
+
+- 定期收集PostgreSQL活动会话信息
+- 支持通过定时任务配置收集频率
+- 提供日志文件自动分割功能
+- 包含丰富的日志分析示例
+
+
+## 安装指南
+
+拉取代码，修改参数，设置定时任务。
+
+```shell
+# 克隆代码
+git clone git@github.com:yansheng836/pg_collect_pgsa.git
+cd pg_collect_pgsa
+
+# 修改必要参数(均以 PG_ 开头，例如：PG_PATH、PG_HOST 等)
+vi pg_collect_pgsa.sh
+
+# 查路径
+pwd
+
+# crontab -e
+# 每分钟执行
+* * * * * pwd路径/pg_collect_pgsa.sh
+
+# 每5秒执行（可自行调整秒数）
+* * * * * pwd路径/pg_collect_pgsa_gap_second.sh 5
+```
 
 ## 日志文件内容
 
@@ -27,36 +58,12 @@
 ```
 
 
-## 使用说明
-
-拉取代码，修改参数，设置定时任务。
-
-```shell
-# 克隆代码
-git clone git@github.com:yansheng836/pg_collect_pgsa.git
-cd pg_collect_pgsa
-
-# 修改必要参数(均以 PG_ 开头，例如：PG_PATH、PG_HOST 等)
-vi pg_collect_pgsa.sh
-
-# 查路径
-pwd
-
-# crontab -e
-# 每分钟执行
-* * * * * pwd路径/pg_collect_pgsa.sh
-
-# 每5秒执行（可自行调整秒数）
-* * * * * pwd路径/pg_collect_pgsa_gap_second.sh 5
-```
-
-
 ## 日志分析参考
 
 ### 1.简单检索
 
 ```shell
-# cat/more/less/grep/ 
+# cat/more/less/grep 
 grep 'idle' pgsa.log
 ```
 
@@ -72,14 +79,14 @@ awk -F '|' '{print $18}' pgsa.log | sort | uniq -c
 ### 3.按照时间统计
 
 ```shell
-# 按天
+# 按天统计
 awk -F '|' '{print $1}' pgsa.log | cut -d ' ' -f1 | sort | uniq -c
      14 2025-08-28
-# 按小时
+# 按小时统计
 awk -F '[| ]' '{print $1 " " $2}' pgsa.log | cut -d: -f1 | sort | uniq -c
       7 2025-08-28 12
       7 2025-08-28 14
-# 按分钟
+# 按分钟统计
 awk -F '[| ]' '{print $1 " " $2}' pgsa.log | cut -d: -f1-2 | sort | uniq -c
       7 2025-08-28 12:59
       7 2025-08-28 14:09
@@ -87,10 +94,18 @@ awk -F '[| ]' '{print $1 " " $2}' pgsa.log | cut -d: -f1-2 | sort | uniq -c
 
 ## 注意事项
 
-1. 在业务较多的库需要注意，可能会存在较多sql，以至于日志增长过快，建议在特殊情况下，短暂使用，并且密切关注磁盘增长。
-2. 其中`query`字段受参数`track_activity_query_size`影响，默认为1024，超长会被截断。修改该参数需要重启服务器。
+1. 在业务繁忙的数据库上使用时，需要注意日志文件可能会快速增长，建议在特殊情况下短暂使用，并密切关注磁盘空间。
+2. `query`字段的长度受PostgreSQL参数`track_activity_query_size`限制，默认为1024，超出部分会被截断。修改此参数需要重启数据库服务。
+3. 账号权限问题，可不使用postgres。推荐最小权限：[创建空库，]创建普通用户，授予`pg_read_all_stats`角色即可。
+      ```sql
+      -- CREATE DATABASE pgsadb;
+      CREATE USER pgsa_user with password 'your password';
+      GRANT pg_read_all_stats TO pgsa_user;
+      ```
 
-## bug反馈/需求
+## 贡献
+
+欢迎提交bug报告或功能需求：
 
 GitHub：<https://github.com/yansheng836/pg_collect_pgsa/issues>
 

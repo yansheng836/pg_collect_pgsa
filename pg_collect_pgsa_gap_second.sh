@@ -5,11 +5,14 @@ MAX_RUNTIME=60
 
 # 设置默认睡眠时间为5秒
 DEFAULT_SLEEP=5
+
+script_path=$(readlink -f "$0")
+script_dir=$(dirname "$script_path")
+
 # 检查是否有参数传入
 if [ $# -eq 0 ]; then
     DEFAULT_SLEEP=5
     #echo "未提供参数，使用默认睡眠时间: ${DEFAULT_SLEEP}秒"
-    #sleep $DEFAULT_SLEEP
 else
     # 有参数
     # 校验参数是否为 (0-60) 的整数
@@ -28,7 +31,6 @@ fi
 
 # 记录脚本开始运行的时间（Unix时间戳）
 START_TIME=$(date +%s)
-
 while true; do
     # 在每次循环开始时检查是否超时
     CURRENT_TIME=$(date +%s)
@@ -39,7 +41,8 @@ while true; do
         exit 0
     fi
 
-    sh ./pg_collect_pgsa.sh  # 替换为实际命令
+    #执行主要命令
+    sh $script_dir/pg_collect_pgsa.sh
 
     #sleep 5
     sleep $DEFAULT_SLEEP

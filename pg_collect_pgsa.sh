@@ -8,7 +8,7 @@ export PATH=$PG_PATH:$PATH
 PG_HOST="localhost"
 PG_PORT="54321"
 PG_USER="postgres"
-PG_PASSWORD="your_password"  # 替换为实际密码
+PG_PASSWORD="your_password"  # 替换为实际密码，或者使用.pgpass文件进行校验，或者pg_hba.conf有针对性的配置免密
 PG_DATABASE="postgres"
 #>>>>>>>>>> 需要修改的参数 >>>>>>>>
 
@@ -17,6 +17,7 @@ script_path=$(readlink -f "$0")
 # 获取当前脚本的名称（不包含路径）
 script_name=$(basename "$0")
 #echo $script_name
+# 获取当前脚本的目录
 script_dir=$(dirname "$script_path")
 
 LOG_FILE="$script_dir/pgsa.log"
@@ -64,7 +65,7 @@ check_and_split_log() {
     if [ ! -f "$LOG_FILE" ] || [ "$(date -r "$LOG_FILE" +"%Y%m%d-%H")" != "$CURRENT_HOUR" ]; then
         if [ -f "$LOG_FILE" ]; then
             file_time=$(date -r "$LOG_FILE" +"%Y%m%d-%H")
-            gzip_file_name="$script_dir/logs/pas-${file_time}.log.gz"
+            gzip_file_name="$script_dir/logs/pgsa-${file_time}.log.gz"
             # 分割并压缩日志文件
             gzip -c "$LOG_FILE" > $gzip_file_name
             log_message "INFO" "按小时分割日志，日志已分割并压缩为 $gzip_file_name 。"
@@ -81,7 +82,7 @@ check_and_split_log() {
         if [ "$file_size" -ge "$MAX_LOG_SIZE" ]; then
             # 获取文件创建时间（精确到秒）
             file_time=$(date -r "$LOG_FILE" +"%Y%m%d-%H%M%S")
-            gzip_file_name="$script_dir/logs/pas-${file_time}.log.gz"
+            gzip_file_name="$script_dir/logs/pgsa-${file_time}.log.gz"
             # 分割并压缩日志文件
             gzip -c "$LOG_FILE" > $gzip_file_name
             log_message "INFO" "日志大小达到阈值[$MAX_LOG_SIZE]，日志已分割并压缩为 $gzip_file_name 。"

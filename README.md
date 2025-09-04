@@ -1,5 +1,10 @@
 # pg_collect_pgsa
 
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/yansheng836/pg_collect_pgsa) ![GitHub Issues](https://img.shields.io/github/issues/yansheng836/pg_collect_pgsa)
+![GitHub Pull Requests](https://img.shields.io/github/issues-pr/yansheng836/pg_collect_pgsa) ![GitHub Tag](https://img.shields.io/github/v/tag/yansheng836/pg_collect_pgsa) ![GitHub Release](https://img.shields.io/github/v/release/yansheng836/pg_collect_pgsa) ![GitHub Repo stars](https://img.shields.io/github/stars/yansheng836/pg_collect_pgsa) ![GitHub forks](https://img.shields.io/github/forks/yansheng836/pg_collect_pgsa) 
+
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4460db83948f4592ab825e8e900ec79f)](https://app.codacy.com/gh/yansheng836/pg_collect_pgsa/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) ![GitHub License](https://img.shields.io/github/license/yansheng836/pg_collect_pgsa) 
+
 这是一个纯脚本工具，用于从PostgreSQL的pg_stat_activity视图中定期收集数据并保存到本地日志文件。
 
 **相关背景**：

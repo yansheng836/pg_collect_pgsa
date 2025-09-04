@@ -29,7 +29,13 @@ CURRENT_TIME=$(date +"%Y%m%d-%H%M%S")  # 精确到秒
 CURRENT_HOUR=$(date +"%Y%m%d-%H")      # 精确到小时
 
 batchid=$(date +"%Y%m%d_%H%M%S_%N")
+
 # 日志记录函数
+# 函数名: log_message
+# 描述: 将日志消息输出到指定日志文件
+# 参数: 
+#   $1 - 日志级别 (INFO, WARNING, ERROR)
+#   $2 - 日志消息内容
 log_message() {
     # 确保日志目录存在
     # 定义日志文件路径
@@ -50,7 +56,7 @@ check_existing_process() {
         trap 'flock -u 9; rm -f "$LOCK_FILE"; exit' INT TERM EXIT
         #log_message "INFO" "获取锁成功，进程 $script_name 不存在，开始执行脚本。"
     else
-        log_message "WARRING" "获取锁失败，进程 $script_name 已在运行中，退出脚本。"
+        log_message "WARNING" "获取锁失败，进程 $script_name 已在运行中，退出脚本。"
         exit 1
     fi
 }
@@ -67,7 +73,7 @@ check_and_split_log() {
             file_time=$(date -r "$LOG_FILE" +"%Y%m%d-%H")
             gzip_file_name="$script_dir/logs/pgsa-${file_time}.log.gz"
             # 分割并压缩日志文件
-            gzip -c "$LOG_FILE" > $gzip_file_name
+            gzip -c "$LOG_FILE" > "$gzip_file_name"
             log_message "INFO" "按小时分割日志，日志已分割并压缩为 $gzip_file_name 。"
 
             # 清空原日志文件
@@ -84,7 +90,7 @@ check_and_split_log() {
             file_time=$(date -r "$LOG_FILE" +"%Y%m%d-%H%M%S")
             gzip_file_name="$script_dir/logs/pgsa-${file_time}.log.gz"
             # 分割并压缩日志文件
-            gzip -c "$LOG_FILE" > $gzip_file_name
+            gzip -c "$LOG_FILE" > "$gzip_file_name"
             log_message "INFO" "日志大小达到阈值[$MAX_LOG_SIZE]，日志已分割并压缩为 $gzip_file_name 。"
 
             # 清空原日志文件
@@ -137,12 +143,9 @@ execute_pg_query() {
 main() {
     log_message "INFO" "begin..."
     check_existing_process
-    #sleep 100
-    #exit 0
     check_and_split_log
     execute_pg_query
     log_message "INFO" "end!"
 }
 
 main
-

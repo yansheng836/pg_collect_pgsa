@@ -42,9 +42,9 @@ while true; do
     fi
 
     #执行主要命令
-    sh $script_dir/pg_collect_pgsa.sh
+    sh "$script_dir/pg_collect_pgsa.sh"
 
     #sleep 5
-    sleep $DEFAULT_SLEEP
+    sleep "$DEFAULT_SLEEP"
 done
 

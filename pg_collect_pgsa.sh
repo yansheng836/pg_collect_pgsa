@@ -12,7 +12,7 @@ PG_PASSWORD="your_password"  # 替换为实际密码
 PG_DATABASE="postgres"
 #>>>>>>>>>> 需要修改的参数 >>>>>>>>
 
-echo "当前文件名:"$0 # 如果是绝对路径，会直接打印；而不是文件名
+#echo "当前文件名:"$0 # 如果是绝对路径，会直接打印；而不是文件名
 script_path=$(readlink -f "$0")
 # 获取当前脚本的名称（不包含路径）
 script_name=$(basename "$0")
@@ -21,8 +21,7 @@ script_dir=$(dirname "$script_path")
 
 LOG_FILE="$script_dir/pgsa.log"
 
-#MAX_LOG_SIZE=$((1024 * 1024 * 1024)) # 1GB
-MAX_LOG_SIZE=$((1024 * 1024)) # 1GB
+MAX_LOG_SIZE=$((1024 * 1024 * 1024)) # 1GB
 
 # 获取当前时间戳（用于日志分割）
 CURRENT_TIME=$(date +"%Y%m%d-%H%M%S")  # 精确到秒
@@ -95,13 +94,40 @@ check_and_split_log() {
 # 执行PostgreSQL查询并记录到日志文件
 execute_pg_query() {
     log_message "INFO" "开始查询数据库..."
-    {
-        #echo "=== 记录时间: $(date '+%Y-%m-%d %H:%M:%S') ==="
-        # 查询pg_stat_activity视图
-        PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_DATABASE" \
-            -A -t -c "SELECT now(),datid, datname, pid, leader_pid, usesysid, usename, application_name, client_addr, client_hostname, client_port, backend_start, xact_start, query_start, state_change, wait_event_type, wait_event, state, backend_xid, backend_xmin, query_id, query, backend_type from pg_stat_activity WHERE pid <> pg_backend_pid() ORDER BY backend_start ASC;"
-        #echo ""
-    } >> "$LOG_FILE"
+    
+    # 查询pg_stat_activity视图
+    ERROR_OUTPUT=$(PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_DATABASE" \
+        -A -t -c "SELECT now(),datid, datname, pid, leader_pid, usesysid, usename, application_name, client_addr, client_hostname, client_port, backend_start, xact_start, query_start, state_change, wait_event_type, wait_event, state, backend_xid, backend_xmin, query_id, query, backend_type from pg_stat_activity WHERE pid <> pg_backend_pid() ORDER BY backend_start ASC;" 2>&1 >> "$LOG_FILE")
+
+    EXIT_STATUS=$?
+    #echo "ERROR_OUTPUT:"$ERROR_OUTPUT
+    #echo "EXIT_STATUS:"$EXIT_STATUS
+
+    # 检查执行状态
+    if [ $EXIT_STATUS -eq 0 ]; then
+        #echo "SQL命令执行成功。"
+        log_message "INFO" "SQL命令执行成功。"
+    else
+        #echo "SQL命令执行失败，错误信息：$ERROR_OUTPUT"
+        log_message "ERROR" "SQL命令执行失败，错误信息为：$ERROR_OUTPUT"
+        # 根据错误信息进行更精细化的判断和处理
+        if echo "$ERROR_OUTPUT" | grep -q "password authentication failed"; then
+            #echo "错误：密码认证失败，请检查用户名和密码。"
+            log_message "ERROR" "错误：密码认证失败，请检查用户名和密码。"
+            exit 1
+        elif echo "$ERROR_OUTPUT" | grep -q "too many clients already"; then
+            #echo "错误：数据库连接数已满。"
+            log_message "ERROR" "错误：数据库连接数已满。"
+            # 可以在这里加入处理连接数满的代码，例如重试或终止空闲连接
+            exit 1
+        # ... 其他错误类型的判断和处理
+        else
+            #echo "未知错误。"
+            log_message "ERROR" "错误：未知错误，详见报错信息。"
+            exit 1
+        fi
+    fi
+
     log_message "INFO" "查询数据库结束。"
 }
 

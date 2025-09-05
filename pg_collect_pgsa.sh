@@ -105,7 +105,7 @@ execute_pg_query() {
 
     # 动态检测PG版本并适配SQL
     PG_MAJOR_VERSION=$(psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_DATABASE" -t -c "SELECT current_setting('server_version_num')::int/10000" 2>/dev/null || echo 10)
-    echo "PG_MAJOR_VERSION:"$PG_MAJOR_VERSION
+    echo "PG_MAJOR_VERSION:""$PG_MAJOR_VERSION"
     # 根据版本构建字段列表
     # PG14+ (≥14)，不需要处理；PG13，query_id，添加 NULL as query_id；PG10-12，leader_pid，query_id，添加两个 NULL as col。
     if [ "$PG_MAJOR_VERSION" -ge 14 ]; then
@@ -119,8 +119,8 @@ execute_pg_query() {
 
     # 构建查询SQL
     SQL="SELECT now(), $FIELDS from pg_stat_activity WHERE pid <> pg_backend_pid() ORDER BY backend_start ASC"
-    echo "SQL:"$SQL
-    
+    echo "SQL:""$SQL"
+
     # 查询pg_stat_activity视图
     ERROR_OUTPUT=$(PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_DATABASE" \
         -A -t -c "$SQL" 2>&1 >> "$LOG_FILE")

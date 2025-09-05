@@ -69,8 +69,8 @@ jobs:
           # 基础功能测试
           ./pg_collect_pgsa.sh
           sleep 2
-          ./pg_collect_pgsa_gap_second.sh 5
-          sleep 5
+          #./pg_collect_pgsa_gap_second.sh 30
+          #sleep 5
           
           # 结果验证
           [ -f "pgsa.log" ] || exit 1

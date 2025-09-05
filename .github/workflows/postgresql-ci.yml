@@ -1,4 +1,4 @@
-name: PostgreSQL Session Collector CI
+name: PostgreSQL Session Collector CI for 10-17
 
 on: [push, pull_request]
 

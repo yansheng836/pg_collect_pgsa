@@ -1,4 +1,4 @@
-name: PostgreSQL Session Collector CI
+name: PostgreSQL Session Collector CI for 16.3
 
 on: [push, pull_request]
 

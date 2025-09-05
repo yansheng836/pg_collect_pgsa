@@ -23,12 +23,12 @@ jobs:
           --health-timeout 5s
           --health-retries 3
         # 特殊处理 PG10 的 healthcheck
-        ${{ if matrix.pg_version == '10' }}: 
-          options: >-
-            --health-cmd "pg_isready -q"
-            --health-interval 10s
-            --health-timeout 5s
-            --health-retries 5
+        #${{ if matrix.pg_version == '10' }}: 
+        #  options: >-
+        #    --health-cmd "pg_isready -q"
+        #    --health-interval 10s
+        #    --health-timeout 5s
+        #    --health-retries 5
 
     steps:
       - name: Checkout code

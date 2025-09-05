@@ -71,10 +71,12 @@ jobs:
           sleep 2
           #./pg_collect_pgsa_gap_second.sh 30
           #sleep 5
+          echo '1.finish run shell'
           
           # 结果验证
           [ -f "pgsa.log" ] || exit 1
           [ -f "debug.log" ] || exit 1
+          echo '2.finish check file exisits'
 
           LOGFILE=$(ls pgsa.log | head -1)
           [ -f "$LOGFILE" ] || exit 1
@@ -85,10 +87,12 @@ jobs:
           grep -q 'walwriter' $LOGFILE
           grep -q 'logical replication launcher' $LOGFILE
           grep -q 'autovacuum launcher' $LOGFILE
+          echo '3.finish check $LOGFILE content'
 
           LOGFILE2=$(ls debug.log | head -1)
           grep -q 'begin...' $LOGFILE2
           grep -q 'end!' $LOGFILE2
+          echo '4.finish check $LOGFILE2 content'
           
           # 特殊字段检查 (PG14+)
           if [ "${{ matrix.pg_version }}" -ge 14 ]; then

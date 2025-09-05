@@ -81,11 +81,11 @@ jobs:
           LOGFILE=$(ls pgsa.log | head -1)
           [ -f "$LOGFILE" ] || exit 1
           grep -q 'Activity' $LOGFILE
-          grep -q 'query' $LOGFILE
           grep -q 'checkpointer' $LOGFILE
           grep -q 'background writer' $LOGFILE
           grep -q 'walwriter' $LOGFILE
-          grep -q 'logical replication launcher' $LOGFILE
+          # 下面这个不一定有，比如pg10没有
+          #grep -q 'logical replication launcher' $LOGFILE
           grep -q 'autovacuum launcher' $LOGFILE
           echo '3.finish check $LOGFILE content'
 

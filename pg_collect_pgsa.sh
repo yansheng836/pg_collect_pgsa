@@ -2,14 +2,15 @@
 
 #<<<<<<<< 需要修改的参数 <<<<<<<<<
 # 设置 PATH，添加 psql 所在路径（ whereis psql ）
-PG_PATH=/usr/local/pgsql/bin/
+# 兼容ci，如果有环境变量，优先使用环境变量，否则使用默认值
+PG_PATH="${PG_PATH:-/usr/local/pgsql/bin/}"
 export PATH=$PG_PATH:$PATH
 #PostgreSQL连接参数
-PG_HOST="localhost"
-PG_PORT="54321"
-PG_USER="postgres"
-PG_PASSWORD="your_password"  # 替换为实际密码，或者使用.pgpass文件进行校验，或者pg_hba.conf有针对性的配置免密
-PG_DATABASE="postgres"
+PG_HOST="${PG_HOST:-localhost}"
+PG_PORT="${PG_PORT:-54321}"
+PG_USER="${PG_USER:-postgres}"
+PG_PASSWORD="${PG_PASSWORD:-your_password}" # 替换为实际密码，或者使用.pgpass文件进行校验，或者pg_hba.conf有针对性的配置免密
+PG_DATABASE="${PG_DATABASE:-postgres}"
 #>>>>>>>>>> 需要修改的参数 >>>>>>>>
 
 #echo "当前文件名:"$0 # 如果是绝对路径，会直接打印；而不是文件名

@@ -1,9 +1,7 @@
 # pg_collect_pgsa
 
-![GitHub commit activity](https://img.shields.io/github/commit-activity/m/yansheng836/pg_collect_pgsa) ![GitHub Issues](https://img.shields.io/github/issues/yansheng836/pg_collect_pgsa)
-![GitHub Pull Requests](https://img.shields.io/github/issues-pr/yansheng836/pg_collect_pgsa) ![GitHub Tag](https://img.shields.io/github/v/tag/yansheng836/pg_collect_pgsa) ![GitHub Release](https://img.shields.io/github/v/release/yansheng836/pg_collect_pgsa) ![GitHub Repo stars](https://img.shields.io/github/stars/yansheng836/pg_collect_pgsa) ![GitHub forks](https://img.shields.io/github/forks/yansheng836/pg_collect_pgsa) 
-
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/4460db83948f4592ab825e8e900ec79f)](https://app.codacy.com/gh/yansheng836/pg_collect_pgsa/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) ![GitHub License](https://img.shields.io/github/license/yansheng836/pg_collect_pgsa) 
+![GitHub commit activity](https://img.shields.io/github/commit-activity/m/yansheng836/pg_collect_pgsa) [![GitHub Issues](https://img.shields.io/github/issues/yansheng836/pg_collect_pgsa)](https://github.com/yansheng836/pg_collect_pgsa/issues)
+[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/yansheng836/pg_collect_pgsa)](https://github.com/yansheng836/pg_collect_pgsa/pulls) [![GitHub Tag](https://img.shields.io/github/v/tag/yansheng836/pg_collect_pgsa)](https://github.com/yansheng836/pg_collect_pgsa/tags) [![GitHub Release](https://img.shields.io/github/v/release/yansheng836/pg_collect_pgsa)](https://github.com/yansheng836/pg_collect_pgsa/releases) ![GitHub Repo stars](https://img.shields.io/github/stars/yansheng836/pg_collect_pgsa) ![GitHub forks](https://img.shields.io/github/forks/yansheng836/pg_collect_pgsa) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/4460db83948f4592ab825e8e900ec79f)](https://app.codacy.com/gh/yansheng836/pg_collect_pgsa/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) [![GitHub License](https://img.shields.io/github/license/yansheng836/pg_collect_pgsa)](https://github.com/yansheng836/pg_collect_pgsa/blob/master/LICENSE.txt)
 
 这是一个纯脚本工具，用于从PostgreSQL的pg_stat_activity视图中定期收集数据并保存到本地日志文件。
 
@@ -18,7 +16,6 @@
 - 支持通过定时任务配置收集频率
 - 提供日志文件自动分割功能
 - 包含丰富的日志分析示例
-
 
 ## 安装指南
 
@@ -64,9 +61,7 @@ pwd
 2025-08-28 13:02:23.339309+08|||29364||||||||2025-08-12 13:58:41.043811+08||||Activity|AutoVacuumMain||||||autovacuum launcher
 2025-08-28 13:02:23.339309+08|5|postgres|6583||10|postgres|Navicat|42.99.63.72||36481|2025-08-28 12:34:20.191304+08||2025-08-28 12:47:55.618303+08|2025-08-28 12:47:55.619804+08|Client|ClientRead|idle|||7982016161531118154|SELECT now(),datid, datname, pid, leader_pid, usesysid, usename, application_name, client_addr, client_hostname, client_port, backend_start, xact_start, query_start, state_change, wait_event_type, wait_event, state, backend_xid, backend_xmin, query_id, query, backend_type from pg_stat_activity WHERE pid <> pg_backend_pid() ORDER BY backend_start ASC|client backend
 2025-08-28 13:02:23.339309+08|5|postgres|6611||10|postgres|Navicat|42.99.63.72||36773|2025-08-28 12:34:26.810414+08||2025-08-28 12:47:55.670278+08|2025-08-28 12:47:55.670683+08|Client|ClientRead|idle|||7746404270258954630|SELECT c.conkey FROM pg_constraint c WHERE c.contype = 'p' and c.conrelid = 12222|client backend
-
 ```
-
 
 ## 日志分析参考
 

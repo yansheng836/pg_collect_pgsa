@@ -25,7 +25,6 @@ LOG_FILE="$script_dir/pgsa.log"
 MAX_LOG_SIZE=$((1024 * 1024 * 1024)) # 1GB，纯文本的压缩率较高（测试 2.8GB-->19MB，压缩率约 99%），如果觉得小了，可以自行调整
 
 # 获取当前时间戳（用于日志分割）
-CURRENT_TIME=$(date +"%Y%m%d-%H%M%S")  # 精确到秒
 CURRENT_HOUR=$(date +"%Y%m%d-%H")      # 精确到小时
 
 batchid=$(date +"%Y%m%d_%H%M%S_%N")

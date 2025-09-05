@@ -1,0 +1,39 @@
+name: Shell Script Syntax Check
+
+on:
+  push:
+    paths:
+      - '**.sh'
+  pull_request:
+    paths:
+      - '**.sh'
+
+jobs:
+  shellcheck:
+    name: Shell Script Syntax Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Install ShellCheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+          
+      - name: Run ShellCheck on all scripts
+        run: |
+          # 检查所有 .sh 文件
+          for script in *.sh; do
+            echo "🔍 Checking $script with ShellCheck..."
+            shellcheck -x "$script"
+          done
+          
+          # 检查包含 shell 脚本的其他文件
+          if grep -rI '^#!/bin/bash' .; then
+            grep -rIl '^#!/bin/bash' . | while read -r file; do
+              echo "🔍 Checking $file with ShellCheck..."
+              shellcheck -x "$file"
+            done
+          fi

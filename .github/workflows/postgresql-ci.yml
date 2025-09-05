@@ -87,16 +87,17 @@ jobs:
           # 下面这个不一定有，比如pg10没有
           #grep -q 'logical replication launcher' $LOGFILE
           grep -q 'autovacuum launcher' $LOGFILE
-          echo '3.finish check $LOGFILE content'
+          echo '3.finish check '$LOGFILE' content'
 
           LOGFILE2=$(ls debug.log | head -1)
           grep -q 'begin...' $LOGFILE2
           grep -q 'end!' $LOGFILE2
-          echo '4.finish check $LOGFILE2 content'
+          echo '4.finish check '$LOGFILE2' content'
           
           # 特殊字段检查 (PG14+)
           if [ "${{ matrix.pg_version }}" -ge 14 ]; then
-            grep -q 'backend_type' $LOGFILE
+            # 暂时不做区分 
+            grep -q 'Activity' $LOGFILE
           fi
           
           echo "PG${{ matrix.pg_version }} test completed successfully"

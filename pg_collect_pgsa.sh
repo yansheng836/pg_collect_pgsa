@@ -102,10 +102,28 @@ check_and_split_log() {
 # 执行PostgreSQL查询并记录到日志文件
 execute_pg_query() {
     log_message "INFO" "开始查询数据库..."
-    
+
+    # 动态检测PG版本并适配SQL
+    PG_MAJOR_VERSION=$(psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_DATABASE" -t -c "SELECT current_setting('server_version_num')::int/10000" 2>/dev/null || echo 10)
+    #echo "PG_MAJOR_VERSION:""$PG_MAJOR_VERSION"
+    # 根据版本构建字段列表
+    # PG14+ (≥14)，不需要处理；PG13，query_id，添加 NULL as query_id；PG10-12，leader_pid，query_id，添加两个 NULL as col。
+    if [ "$PG_MAJOR_VERSION" -ge 14 ]; then
+        FIELDS="datid, datname, pid, leader_pid, usesysid, usename, application_name, client_addr, client_hostname, client_port, backend_start, xact_start, query_start, state_change, wait_event_type, wait_event, state, backend_xid, backend_xmin, query_id, query, backend_type"
+    elif [ "$PG_MAJOR_VERSION" -ge 13 ]; then
+        FIELDS="datid, datname, pid, leader_pid, usesysid, usename, application_name, client_addr, client_hostname, client_port, backend_start, xact_start, query_start, state_change, wait_event_type, wait_event, state, backend_xid, backend_xmin, NULL as query_id, query, backend_type"
+    else
+        # PG10-12兼容处理
+        FIELDS="datid, datname, pid, NULL as leader_pid, usesysid, usename, application_name, client_addr, client_hostname, client_port, backend_start, xact_start, query_start, state_change, wait_event_type, wait_event, state, backend_xid, backend_xmin, NULL as query_id, query, backend_type"
+    fi
+
+    # 构建查询SQL
+    SQL="SELECT now(), $FIELDS from pg_stat_activity WHERE pid <> pg_backend_pid() ORDER BY backend_start ASC"
+    #echo "SQL:""$SQL"
+
     # 查询pg_stat_activity视图
     ERROR_OUTPUT=$(PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_DATABASE" \
-        -A -t -c "SELECT now(),datid, datname, pid, leader_pid, usesysid, usename, application_name, client_addr, client_hostname, client_port, backend_start, xact_start, query_start, state_change, wait_event_type, wait_event, state, backend_xid, backend_xmin, query_id, query, backend_type from pg_stat_activity WHERE pid <> pg_backend_pid() ORDER BY backend_start ASC;" 2>&1 >> "$LOG_FILE")
+        -A -t -c "$SQL" 2>&1 >> "$LOG_FILE")
 
     EXIT_STATUS=$?
     #echo "ERROR_OUTPUT:"$ERROR_OUTPUT

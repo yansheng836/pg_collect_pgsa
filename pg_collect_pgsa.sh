@@ -77,7 +77,7 @@ check_and_split_log() {
             log_message "INFO" "按小时分割日志，日志已分割并压缩为 $gzip_file_name 。"
 
             # 清空原日志文件
-            > "$LOG_FILE"
+            true > "$LOG_FILE"
         fi
     fi
 
@@ -94,7 +94,7 @@ check_and_split_log() {
             log_message "INFO" "日志大小达到阈值[$MAX_LOG_SIZE]，日志已分割并压缩为 $gzip_file_name 。"
 
             # 清空原日志文件
-            > "$LOG_FILE"
+            true > "$LOG_FILE"
         fi
     fi
 }

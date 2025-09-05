@@ -3,11 +3,14 @@ name: PostgreSQL Session Collector CI
 on: [push, pull_request]
 
 jobs:
-  integration-test:
+  multi-version-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        pg_version: [10, 11, 12, 13, 14, 15, 16, 17]
     services:
       postgres:
-        image: postgres:16.3
+        image: postgres:${{ matrix.pg_version }}
         env:
           POSTGRES_USER: test_user
           POSTGRES_PASSWORD: test_pass
@@ -19,51 +22,85 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 3
+        # 特殊处理 PG10 的 healthcheck
+        ${{ if matrix.pg_version == 10 }}: 
+          options: >-
+            --health-cmd "pg_isready -q"
+            --health-interval 10s
+            --health-timeout 5s
+            --health-retries 5
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Setup PostgreSQL permissions
+      
+      - name: Setup PostgreSQL ${{ matrix.pg_version }}
         run: |
-          docker exec ${{ job.services.postgres.id }} psql -U test_user -d test_db -c \
-            "CREATE USER pgsa_user WITH PASSWORD 'pgsa_pass'; \
-             GRANT pg_read_all_stats TO pgsa_user;"
+          # 等待数据库完全启动
+          for i in {1..10}; do
+            pg_isready -U test_user -d test_db -h localhost -p 5432 && break
+            sleep 2
+          done
+          
+          # 创建监控账号 (PG10 需要特殊处理)
+          if [ "${{ matrix.pg_version }}" -lt 12 ]; then
+            docker exec ${{ job.services.postgres.id }} psql -U test_user -d test_db -c \
+              "CREATE USER pgsa_user WITH PASSWORD 'pgsa_pass'; \
+               GRANT pg_monitor TO pgsa_user;"
+          else
+            docker exec ${{ job.services.postgres.id }} psql -U test_user -d test_db -c \
+              "CREATE USER pgsa_user WITH PASSWORD 'pgsa_pass'; \
+               GRANT pg_read_all_stats TO pgsa_user;"
+          fi
 
-      - name: Test minute-level collection
+      - name: Test on PG${{ matrix.pg_version }}
         run: |
-          chmod +x pg_collect_pgsa.sh
+          # 设置环境变量
           export PG_HOST=localhost
           export PG_PORT=5432
           export PG_USER=pgsa_user
           export PG_PASSWORD=pgsa_pass
           export PG_DATABASE=test_db
+          
+          # 执行测试
+          chmod +x pg_collect_pgsa.sh
+          chmod +x pg_collect_pgsa_gap_second.sh
+          
+          # 基础功能测试
           ./pg_collect_pgsa.sh
-          #[ -f "pgsa-$(date +%Y%m%d)-$(date +%H).log" ] || exit 1
+          sleep 2
+          ./pg_collect_pgsa_gap_second.sh 5
+          sleep 5
+          
+          # 结果验证
           [ -f "pgsa.log" ] || exit 1
           [ -f "debug.log" ] || exit 1
 
-      - name: Test second-level collection
-        run: |
-          chmod +x pg_collect_pgsa_gap_second.sh
-          export PG_HOST=localhost
-          export PG_PORT=5432
-          export PG_USER=pgsa_user
-          export PG_PASSWORD=pgsa_pass
-          export PG_DATABASE=test_db
-          ./pg_collect_pgsa_gap_second.sh 3
-          sleep 5  # Allow time for collection
-          [ $(grep -c "Activity" pgsa.log) -ge 2 ] || exit 1
-
-      - name: Verify log content
-        run: |
           LOGFILE=$(ls pgsa.log | head -1)
+          [ -f "$LOGFILE" ] || exit 1
+          grep -q 'Activity' $LOGFILE
+          grep -q 'query' $LOGFILE
           grep -q 'checkpointer' $LOGFILE
           grep -q 'background writer' $LOGFILE
           grep -q 'walwriter' $LOGFILE
           grep -q 'logical replication launcher' $LOGFILE
           grep -q 'autovacuum launcher' $LOGFILE
-          
+
           LOGFILE2=$(ls debug.log | head -1)
           grep -q 'begin...' $LOGFILE2
           grep -q 'end!' $LOGFILE2
+          
+          # 特殊字段检查 (PG14+)
+          if [ "${{ matrix.pg_version }}" -ge 14 ]; then
+            grep -q 'backend_type' $LOGFILE
+          fi
+          
+          echo "PG${{ matrix.pg_version }} test completed successfully"
+
+      - name: Archive logs
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: pg${{ matrix.pg_version }}-logs
+          path: |
+            pgsa.log

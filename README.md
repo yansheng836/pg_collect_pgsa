@@ -1,9 +1,8 @@
 # pg_collect_pgsa
 
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/yansheng836/pg_collect_pgsa/shell-ci.yml?style=flat&label=build%3A%20shell-ci) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/yansheng836/pg_collect_pgsa/postgresql-ci.yml?style=flat&label=build%3A%20postgresql-ci) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/yansheng836/pg_collect_pgsa) [![GitHub Issues](https://img.shields.io/github/issues/yansheng836/pg_collect_pgsa)](https://github.com/yansheng836/pg_collect_pgsa/issues)
-[![GitHub Pull Requests](https://img.shields.io/github/issues-pr/yansheng836/pg_collect_pgsa)](https://github.com/yansheng836/pg_collect_pgsa/pulls) [![GitHub Tag](https://img.shields.io/github/v/tag/yansheng836/pg_collect_pgsa)](https://github.com/yansheng836/pg_collect_pgsa/tags) [![GitHub Release](https://img.shields.io/github/v/release/yansheng836/pg_collect_pgsa)](https://github.com/yansheng836/pg_collect_pgsa/releases) ![GitHub Repo stars](https://img.shields.io/github/stars/yansheng836/pg_collect_pgsa) ![GitHub forks](https://img.shields.io/github/forks/yansheng836/pg_collect_pgsa) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/4460db83948f4592ab825e8e900ec79f)](https://app.codacy.com/gh/yansheng836/pg_collect_pgsa/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) [![GitHub License](https://img.shields.io/github/license/yansheng836/pg_collect_pgsa)](https://github.com/yansheng836/pg_collect_pgsa/blob/master/LICENSE.txt)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/yansheng836/pg_collect_pgsa/shell-ci.yml?style=flat&label=build%3A%20shell-ci) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/yansheng836/pg_collect_pgsa/postgresql-ci-16.3.yml?style=flat&label=build%3A%20postgresql-ci-16.3) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/yansheng836/pg_collect_pgsa/postgresql-ci.yml?style=flat&label=build%3A%20postgresql-ci-10-17) ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/yansheng836/pg_collect_pgsa) [![GitHub Issues](https://img.shields.io/github/issues/yansheng836/pg_collect_pgsa)](https://github.com/yansheng836/pg_collect_pgsa/issues) [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/yansheng836/pg_collect_pgsa)](https://github.com/yansheng836/pg_collect_pgsa/pulls) [![GitHub Tag](https://img.shields.io/github/v/tag/yansheng836/pg_collect_pgsa)](https://github.com/yansheng836/pg_collect_pgsa/tags) [![GitHub Release](https://img.shields.io/github/v/release/yansheng836/pg_collect_pgsa)](https://github.com/yansheng836/pg_collect_pgsa/releases) ![GitHub Repo stars](https://img.shields.io/github/stars/yansheng836/pg_collect_pgsa) ![GitHub forks](https://img.shields.io/github/forks/yansheng836/pg_collect_pgsa) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/4460db83948f4592ab825e8e900ec79f)](https://app.codacy.com/gh/yansheng836/pg_collect_pgsa/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) [![GitHub License](https://img.shields.io/github/license/yansheng836/pg_collect_pgsa)](https://github.com/yansheng836/pg_collect_pgsa/blob/master/LICENSE.txt)
 
-这是一个纯脚本工具，用于从PostgreSQL的pg_stat_activity视图中定期收集数据并保存到本地日志文件。
+这是一个纯脚本工具，用于从PostgreSQL的pg_stat_activity视图中定期收集数据并保存到本地日志文件。支持PG10-PG17版本。
 
 **相关背景**：
 
@@ -43,6 +42,8 @@ pwd
 ## 日志文件内容
 
 测试版本：PostgreSQL 16.3 on x86_64-pc-linux-gnu, compiled by gcc (GCC) 4.8.5 20150623 (Red Hat 4.8.5-44), 64-bit
+
+CI版本：PG10-PG17
 
 输出字段为：now(),datid, datname, pid, leader_pid, usesysid, usename, application_name, client_addr, client_hostname, client_port, backend_start, xact_start, query_start, state_change, wait_event_type, wait_event, state, backend_xid, backend_xmin, query_id, query, backend_type
 
